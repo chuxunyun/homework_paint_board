@@ -6,17 +6,10 @@
 //  * 画图区：白色画布，按住鼠标左键拖动即可绘制
 //  * 快捷键：Esc 退出，Ctrl/⌘ + Z 撤销
 //
-//  macOS + CLion：使用项目自带的 graphics.h 兼容层直接运行；
-//  Windows：使用官方 EasyX，编译同一份源码即可。
+//  macOS + CLion：使用项目自带的 graphics.h 兼容层直接运行。
 // ============================================================================
 
-#if defined(_WIN32)
-#  define NOMINMAX
-#  include <windows.h>
-#  include <graphics.h>
-#else
-#  include <graphics.h>
-#endif
+#include <graphics.h>
 
 #include <algorithm>
 #include <cmath>
@@ -55,11 +48,7 @@ const COLORREF canvasBorder = RGB(212, 219, 230);
 const COLORREF canvasHint   = RGB(196, 203, 214);
 }  // namespace col
 
-#ifdef _WIN32
-static const TCHAR* const kFont = TEXT("Microsoft YaHei");
-#else
 static const TCHAR* const kFont = TEXT("PingFang SC");
-#endif
 
 // ---------------------------------------------------------------------------
 // 调色板
@@ -141,15 +130,13 @@ public:
         render();
     }
 
-#ifndef _WIN32
-    // 仅 macOS 调试用：不开窗口，直接渲染一帧
+    // 仅调试用：不开窗口，直接渲染一帧
     void initOffscreen() {
         easyx_compat::initgraph_offscreen(ui::WIN_W, ui::WIN_H, 2.0f);
         setbkcolor(col::windowBg);
         cleardevice();
         render();
     }
-#endif
 
     void run() {
         ExMessage msg;
@@ -239,12 +226,7 @@ private:
     int currentMargin_ = 2;
 
     static bool gfxWindowAlive() {
-#if defined(_WIN32)
-        HWND hwnd = GetHWnd();
-        return hwnd != nullptr && IsWindow(hwnd) != 0;
-#else
         return easyx_window_alive();
-#endif
     }
 
     bool inCanvas(int x, int y) const {
@@ -368,13 +350,8 @@ private:
             return;
         }
 
-#if defined(_WIN32)
-        // EasyX 的按键消息里 ctrl 字段与 vkcode 共用同一块内存，
-        // 不能直接读，这里用系统函数判断 Ctrl 是否按下。
-        const bool ctrl = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
-#else
+        // 兼容层会把 Ctrl 或 Command 都映射到 msg.ctrl
         const bool ctrl = msg.ctrl;
-#endif
 
         if (ctrl && (vk == 'z' || vk == 'Z')) {
             if (!strokes_.empty()) {
@@ -450,11 +427,7 @@ private:
         textAt(566, 25, TEXT("线宽"), 13, col::textDim);
         for (int i = 0; i < 4; ++i) drawWidthChip(i);
 
-#ifdef _WIN32
-        const TCHAR* hint = TEXT("Esc 退出  ·  Ctrl+Z 撤销");
-#else
         const TCHAR* hint = TEXT("Esc 退出  ·  Cmd+Z 撤销");
-#endif
         int hintW = textMeasure(hint, 12);
         textAt(ui::WIN_W - ui::MARGIN - hintW, 26, hint, 12, col::textDim);
 
@@ -612,7 +585,6 @@ private:
 // ---------------------------------------------------------------------------
 // 无窗口截图（仅 macOS 调试用）
 // ---------------------------------------------------------------------------
-#ifndef _WIN32
 namespace {
 
 void sendMouse(PaintBoard& board, int message, int x, int y) {
@@ -705,19 +677,14 @@ int renderPreview(const char* path) {
 }
 
 }  // namespace
-#endif
 
 // ---------------------------------------------------------------------------
 // main
 // ---------------------------------------------------------------------------
 int main(int argc, char** argv) {
-#ifndef _WIN32
     if (argc >= 3 && std::string(argv[1]) == "--shot") {
         return renderPreview(argv[2]);
     }
-#endif
-    (void)argc;
-    (void)argv;
 
     PaintBoard board;
     board.init();

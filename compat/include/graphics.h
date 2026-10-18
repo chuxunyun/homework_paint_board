@@ -1,10 +1,8 @@
 // ============================================================================
 //  graphics.h —— EasyX 兼容层（macOS 版）
 // ----------------------------------------------------------------------------
-//  官方 EasyX 只支持 Windows（GDI）。本文件在 macOS 上提供与 EasyX 同名、
-//  同参数的接口，内部使用 Cocoa/CoreGraphics 实现，使同一份作业源码可以：
-//      * 在 Mac + CLion 上直接编译、运行、调试；
-//      * 在 Windows + 官方 EasyX 上原样编译（此时不会用到本文件）。
+//  在 macOS 上提供与 EasyX 同名、同参数的接口，内部使用 Cocoa/CoreGraphics
+//  实现。这样，按 EasyX 写法编写的画板源码可以在 Mac + CLion 上直接编译、运行。
 //
 //  支持的常用接口：
 //      initgraph / closegraph / cleardevice / getwidth / getheight
@@ -22,16 +20,12 @@
 #ifndef EASYX_COMPAT_GRAPHICS_H
 #define EASYX_COMPAT_GRAPHICS_H
 
-#if defined(_WIN32)
-#  error "本兼容层只用于 macOS；Windows 下请直接使用官方 EasyX 的 graphics.h。"
-#endif
-
 #include <cstddef>
 
 // ---------------------------------------------------------------------------
-// Windows / EasyX 的基础类型
+// EasyX 的基础类型
 // ---------------------------------------------------------------------------
-typedef unsigned int  COLORREF;   // 0x00BBGGRR，与 Windows 一致
+typedef unsigned int  COLORREF;   // 0x00BBGGRR，与 EasyX 一致
 typedef unsigned int  DWORD;
 typedef wchar_t       TCHAR;
 typedef TCHAR*        LPTSTR;
@@ -48,7 +42,7 @@ typedef POINT* LPPOINT;
                 (((unsigned int)(unsigned char)(b)) << 16)))
 #endif
 
-// 常用颜色常量（Windows 的 wingdi.h 里也是这么定义的）
+// 常用颜色常量
 #ifndef BLACK
 #define BLACK      RGB(0, 0, 0)
 #define WHITE      RGB(255, 255, 255)
@@ -105,10 +99,6 @@ struct ExMessage {
     bool lbutton = false;
     bool mbutton = false;
     bool rbutton = false;
-    // EasyX 的鼠标移动消息里用 mkLButton 表示“左键是否正按着”
-    bool mkLButton = false;
-    bool mkMButton = false;
-    bool mkRButton = false;
     short x = 0;
     short y = 0;
     short wheel = 0;

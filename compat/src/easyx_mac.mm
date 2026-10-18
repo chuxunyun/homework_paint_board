@@ -430,9 +430,6 @@ void Sleep(DWORD milliseconds) {
     m.x = (short)std::lround(p.x);
     m.y = (short)std::lround(p.y);
     m.lbutton = down;
-    m.mkLButton = down;
-    m.mkMButton = false;
-    m.mkRButton = false;
     m.ctrl = ([event modifierFlags] & NSEventModifierFlagControl) != 0;
     m.shift = ([event modifierFlags] & NSEventModifierFlagShift) != 0;
     easyx_compat::push_event(m);
